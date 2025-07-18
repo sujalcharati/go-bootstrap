@@ -18,6 +18,31 @@ var (
 	taskID int = 1
 )
 
+
+func deleteTask ( w http.ResponseWriter, r *http.Request){
+      
+	if r.Method != http.MethodDelete {
+		http.Error(w," invalid request method",http.StatusBadRequest)
+		return
+	}
+
+	id := r.URL.Path[len("/delete/"):]
+
+	for i,val := range Task {
+
+		if val.Id == id {
+              Task = append(Task[: i],Task[i+1:]...)
+
+			  w.Header().Set("Content-Type","application/json")
+			  w.WriteHeader(http.StatusOK)
+			  json.NewEncoder(w).Encode(Task)
+			  return
+		}
+	}
+
+
+}
+
 func updateTask(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPut {
@@ -115,8 +140,9 @@ func main() {
 
 	http.HandleFunc("/tasks", createNewTask)
 	http.HandleFunc("/gettasks", getTasks)
-	http.HandleFunc("/gettasks/", getTaskByID)
+	http.HandleFunc("/gettasks/{id}", getTaskByID)
 	http.HandleFunc("/tasks/", updateTask)
+	http.HandleFunc("/delete/{id}",deleteTask)
 	fmt.Print(" server is running on port 8080\n")
 	http.ListenAndServe(":8080", nil)
 }
